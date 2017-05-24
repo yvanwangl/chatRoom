@@ -107,8 +107,9 @@ function createWebSocketServer(server, onConnection, onMessage, onClose, onError
         console.log(`[WebScoket] error: ${err}`);
     };
 
-    wss.on('connection', (ws)=>{
-        let location = url.parse(ws.upgradeReq.url, true);
+    wss.on('connection', (ws, req)=>{
+        console.log(ws);
+        let location = url.parse(req.url, true);
         console.log(`[WebScoketServer] connection: ${location.href}`);
         ws.on('message', onMessage);
         ws.on('close', onClose);
@@ -117,7 +118,7 @@ function createWebSocketServer(server, onConnection, onMessage, onClose, onError
             ws.close(4000, 'Invalid URL');
         }
         //check user
-        let user = parseUser(ws.upgradeReq);
+        let user = parseUser(req);
         if(!user){
             ws.close(4001, 'Invalid user');
         }
