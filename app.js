@@ -89,7 +89,7 @@ function createWebSocketServer(server, onConnection, onMessage, onClose, onError
         server: server
     });
     //聊天消息广播
-    wss.broadcast = (data) => wss.clients.map(client=> client.send(data));
+    wss.broadcast = (data) => wss.clients.forEach(client=> client.send(data));
 
     onConnection = onConnection || function(){
         console.log(`[WebScoket] connected.`);
@@ -148,16 +148,18 @@ function createMessage(type, user, data){
 function onConnect(){
     let user = this.user;
     let wss = this.wss;
-    let msg = createMessage('join', user, `${user.name} joined chatroom.` );
-    wss.broadcast(msg);
+    let joinMsg = createMessage('join', user, `${user.name} joined chatroom.` );
+    wss.broadcast(joinMsg);
     //build user list
-    let users = wss.clients.map(client=> client.user);
-    this.send(createMessage('list', user, users));
+    let users = Array.from(wss.clients).map(client=> client.user);
+    let listMsg = createMessage('list', user, users);
+    //this.send(listMsg);
+    wss.broadcast(listMsg);
 }
 
 function onMessage(message){
     console.log(message);
-    if(messagemsg && message.trim()){
+    if(message && message.trim()){
         let msg = createMessage('chat', this.user, message.trim());
         this.wss.broadcast(msg);
     }
